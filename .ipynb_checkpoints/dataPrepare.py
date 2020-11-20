@@ -4,6 +4,8 @@ import seaborn as sns
 
 import matplotlib.pyplot as plt
 
+import torch as torch
+
 # data = pd.read_csv(
 #     "https://storage.googleapis.com/covid19-open-data/v2/main.csv",
 #     usecols=["urban_area","life_expectancy","infant_mortality_rate","adult_male_mortality_rate",
