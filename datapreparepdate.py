@@ -8,4 +8,3 @@ data = pd.read_csv('/home/tansen/my files/dataScienceLab/gcp_covid19_countryleve
                     ]
                    )
 
-sns.boxplot(x=data['total_hospitalized'])
