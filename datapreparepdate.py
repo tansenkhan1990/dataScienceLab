@@ -1,10 +1,11 @@
 import pandas as pd
 
-import numpy as np
+import seaborn as sns
 
+data = pd.read_csv('/home/tansen/my files/dataScienceLab/gcp_covid19_countrylevel.csv',
+                   usecols=["key","date","country_name","total_hospitalized", "current_hospitalized", "new_intensive_care", "total_intensive_care",
+                       "hospital_beds","nurses","physicians","health_expenditure","out_of_pocket_health_expenditure"
+                    ]
+                   )
 
-data = pd.read_csv(
-    "/home/tansen/my files/dataScienceLab/GCP_COVID19_MERGED.csv"
-)
-
-print(len(data))
+sns.boxplot(x=data['total_hospitalized'])
