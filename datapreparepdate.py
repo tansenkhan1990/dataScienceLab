@@ -2,212 +2,105 @@ import pandas as pd
 
 import seaborn as sns
 
-data = pd.read_csv('/home/tansen/my files/dataScienceLab/gcp_covid19_countrylevel.csv',
-                   usecols=["key","date","country_name","total_hospitalized", "current_hospitalized", "new_intensive_care", "total_intensive_care","area",
-                       "hospital_beds","nurses","physicians","health_expenditure","out_of_pocket_health_expenditure"
+import matplotlib.pyplot as plt
+
+import numpy as np
+
+
+# data = pd.read_csv('/home/tansen/my files/dataScienceLab/gcp_covid19_countrylevel.csv',
+#                    usecols=["key","date","country_name","total_hospitalized", "current_hospitalized", "new_intensive_care", "total_intensive_care","area",
+#                        "hospital_beds","nurses","physicians","health_expenditure","out_of_pocket_health_expenditure"
+#                     ]
+#                    )
+# main_data = data
+
+
+data = pd.read_csv('/home/tansen/my files/dataScienceLab/Covid_Week3.csv',
+                   usecols=["key","date","country_name",
+                    "nurses","physicians","health_expenditure","out_of_pocket_health_expenditure"
                     ]
                    )
-main_data = data
+df = data
+df['year'] = pd.DatetimeIndex(data['date']).year
+df['month'] = pd.DatetimeIndex(data['date']).month
+df['day'] = pd.DatetimeIndex(data['date']).day
+main_data=df
+print(data.columns)
 
 print(data.shape)
 
-##########remove a field 
 
-df = data.drop(data[data.area <= 10000].index)
+plt.scatter(data.nurses, data.health_expenditure)
+plt.show()
 
-#######show loss 
+plt.scatter(data.out_of_pocket_health_expenditure, data.health_expenditure)
+plt.show()
+
+plt.scatter(data.physicians, data.health_expenditure)
+plt.show()
+
+#all relation for each other
+sns.pairplot(data)
+#for Histrogram
+data.hist(figsize=(16,20), bins=50, xlabelsize=8, ylabelsize=8)
+#coorelation
+mask = np.tril(data.corr())
+sns.heatmap(data.corr(), fmt='.1g', annot = True, cmap= 'cool', mask=mask)
+###corelation
+corr = data.drop('month',axis=1).corr()
+sns.heatmap(corr[(corr>0.5) | (corr <= -0.4)],cmap='viridis',vmax=1.0,vmin=-1.0,linewidth=0.1,annot=True,annot_kws={"size":8},square=True)
+
+#####check missing values
 
 totalnull_df = df.isnull().sum()
 percentnull = totalnull_df/len(df)*100
 display(percentnull)
+######density
 
-######## shows country 
+data.plot(kind='density', subplots=True, layout=(4,4), sharex=False, figsize=(20, 20))
 
-df[df.total_hospitalized.notnull()].country_name.unique()
+##########check month groupby
 
-########shows missing values
+print(data.month.unique())
 
-df = data
-totalnull_df = df.isna().sum()
-percentnull = totalnull_df/len(df)*100
-display(percentnull)
+#######boxplot for nurses and check the outlier###################
 
-########formet the dates mssing values 
+sns.boxplot(y = df['nurses'])
 
-data['year'] = pd.DatetimeIndex(data['date']).year
-data['month'] = pd.DatetimeIndex(data['date']).month
-data['day'] = pd.DatetimeIndex(data['date']).day
-df = data[data.month <= 1]
-totalnull_df = df.isna().sum()
-percentnull = totalnull_df/len(df)*100
-display(percentnull)
+ax = sns.barplot(x = df['nurses'], y="health_expenditure", data=data)
+#ax = sns.barplot(x = df['nurses'], y="month", data=data)
 
-######## formet the date and missing values
+print(df[df.nurses>15].country_name.unique()) # got ['Belgium' 'Switzerland' 'Ireland' 'Iceland' 'Norway'] for outlier
 
-data['year'] = pd.DatetimeIndex(data['date']).year
-data['month'] = pd.DatetimeIndex(data['date']).month
-data['day'] = pd.DatetimeIndex(data['date']).day
-df = data[data.month <= 11]
-totalnull_df = df.isna().sum()
-percentnull = totalnull_df/len(df)*100
-display(percentnull)
+#####check for physican
+sns.boxplot(y = df['physicians'])
 
-#formet the dates and missing vlaues
-data['year'] = pd.DatetimeIndex(data['date']).year
-data['month'] = pd.DatetimeIndex(data['date']).month
-data['day'] = pd.DatetimeIndex(data['date']).day
-df = data[data.month <= 3]
-totalnull_df = df.isna().sum()
-percentnull = totalnull_df/len(df)*100
-display(percentnull)
+ax = sns.barplot(x = df['physicians'], y="health_expenditure", data=data)
+#ax = sns.barplot(x = df['physicians'], y="month", data=data)
 
-#formet and missing values
 
-data['year'] = pd.DatetimeIndex(data['date']).year
-data['month'] = pd.DatetimeIndex(data['date']).month
-data['day'] = pd.DatetimeIndex(data['date']).day
-df = data[data.month <= 4]
-totalnull_df = df.isna().sum()
-percentnull = totalnull_df/len(df)*100
-display(percentnull)
+print(df[df.nurses>6].country_name.unique()) #  got outlier for ['Austria' 'Australia' 'Belgium' 'Brazil' 'Belarus' 'Canada' 'Switzerland'
+ # 'Chile' 'Cuba' 'Czech Republic' 'Germany' 'Denmark' 'Estonia' 'Finland'
+ # 'France' 'United Kingdom' 'Croatia' 'Ireland' 'Iceland' 'Japan'
+ # 'South Korea' 'Kuwait' 'Lithuania' 'Luxembourg' 'Netherlands' 'Norway'
+ # 'New Zealand' 'Poland' 'Portugal' 'Qatar' 'Romania' 'Serbia' 'Russia'
+ # 'Sweden' 'Singapore' 'Slovenia' 'Slovakia' 'United States of America']
 
-# dates and missing values
-data['year'] = pd.DatetimeIndex(data['date']).year
-data['month'] = pd.DatetimeIndex(data['date']).month
-data['day'] = pd.DatetimeIndex(data['date']).day
-df = data[data.month <= 5]
-totalnull_df = df.isna().sum()
-percentnull = totalnull_df/len(df)*100
-display(percentnull)
+sns.boxplot(y = df['out_of_pocket_health_expenditure'])
 
-#check null values 
-print(data.key.isna().sum())
+ax = sns.barplot(x = df['out_of_pocket_health_expenditure'], y="health_expenditure", data=data)
+# ax = sns.barplot(x = df['out_of_pocket_health_expenditure'], y="month", data=data)
 
-print(data.key.isnull().sum())
 
-print(data.date.isna().sum())
+print(df[df.out_of_pocket_health_expenditure>1000].country_name.unique()) # got ['Switzerland' 'Iceland' 'Norway' 'United States of America'] as outlier
 
-print(data.date.isnull().sum())
 
-print(data.country_name.isna().sum())
+sns.boxplot(y = df['health_expenditure'])
 
-print(data.country_name.isnull().sum())
+# ax = sns.barplot(x = df['health_expenditure'], y="month", data=data)
 
-print(data.total_hospitalized.isna().sum())
-
-print(data.total_hospitalized.isnull().sum())
-
-print(data.total_hospitalized.max())
-
-print(data.total_hospitalized.min())
-
-print(data.current_hospitalized.isna().sum())
-
-print(data.current_hospitalized.isnull().sum())
-
-print(data.current_hospitalized.max())
-
-print(data.current_hospitalized.min())
-
-print(data.new_intensive_care.isna().sum())
-
-print(data.new_intensive_care.min())
-
-print(data.new_intensive_care.max())
-
-print(data.total_intensive_care.isna().sum())
-
-print(data.total_intensive_care.max())
-
-print(data.total_intensive_care.min())
-
-print(data.hospital_beds.isnull().sum())
-
-print(data.hospital_beds.max())
-
-print(data.hospital_beds.min())
-
-print(data.nurses.isna().sum())
-
-print(data.nurses.max())
-
-print(data.nurses.min())
-
-print(data.physicians.isna().sum())
-
-print(data.physicians.max())
-
-print(data.physicians.min())
-
-print(data.health_expenditure.isna().sum())
-
-print(data.health_expenditure.max())
-
-print(data.health_expenditure.min())
-
-print(data.out_of_pocket_health_expenditure.isna().sum())
-
-print(data.out_of_pocket_health_expenditure.max())
-
-print(data.out_of_pocket_health_expenditure.min())
-
-############show the box plot
-
-sns.boxplot(x = data['total_hospitalized'])
-
-sns.boxplot(x = data['current_hospitalized'])
-############# show bar chat
-
-sns.set_theme(style="whitegrid")
-data['year'] = pd.DatetimeIndex(data['date']).year
-data['month'] = pd.DatetimeIndex(data['date']).month
-data['day'] = pd.DatetimeIndex(data['date']).day
-ax = sns.barplot(x = data['month'], y="total_hospitalized", data=data)
-
-ax = sns.barplot(x = 'month', y = data.new_intensive_care, data=data)
-
-
-ax = sns.barplot(x = data['month'], y="current_hospitalized", data=data)
-
-ax = sns.barplot(x = 'month', y = data.total_intensive_care, data=data)
-
-ax = sns.barplot(x = 'month', y = data.hospital_beds, data=data)
-
-ax = sns.barplot(x = 'month', y = data.physicians, data=data)
-
-ax = sns.barplot(x = 'month', y = data.health_expenditure, data=data)
-
-ax = sns.barplot(x = 'month', y = data.out_of_pocket_health_expenditure, data=data)
-##########groupBy 
-
-print(data.groupby(['month','total_hospitalized','country_name']).size())
-
-print(data.groupby(['country_name','month','total_hospitalized','current_hospitalized']).size())
-
-print(data.groupby(['country_name','date','new_intensive_care']).size())
-
-print(data.groupby(['country_name','month','total_intensive_care']).size())
-
-print(data.groupby(['country_name','date','hospital_beds']).size())
-
-print(data.groupby(['country_name','date','physicians']).size())
-
-print(data.groupby(['country_name','date','health_expenditure']).size())
-
-print(data.groupby(['country_name','date','out_of_pocket_health_expenditure']).size())
-
-###########filter
-
-print(data[data.month == 1][['country_name','total_hospitalized','current_hospitalized']])
-
-print(data[data.month == 2][['country_name','total_hospitalized','current_hospitalized']])
-
-print(data[data.month == 3][['country_name','total_hospitalized','current_hospitalized']])
-
-print(data[data.month == 4][['country_name','total_hospitalized','current_hospitalized']])
-
-print(data[(data.month == 1) & (data.country_name == 'China')])
-
-print(data[(data.month == 2) & (data.country_name == 'China')])
-
-print(data[(data.month <= 4) & (data.country_name == 'China') & (data.total_hospitalized.isna())])
+print(df[df.health_expenditure>3500].country_name.unique())
+#got outlier for ['Austria' 'Australia' 'Belgium' 'Canada' 'Switzerland' 'Germany'
+ # 'Denmark' 'Finland' 'France' 'United Kingdom' 'Ireland' 'Iceland' 'Japan'
+ # 'Luxembourg' 'Netherlands' 'Norway' 'New Zealand' 'Sweden'
+ # 'United States of America']
